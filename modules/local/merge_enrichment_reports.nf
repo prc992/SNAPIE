@@ -1,11 +1,7 @@
 process merge_enrichment_reports {
     label 'low_cpu_low_mem'
     container = params.containers.python
-<<<<<<< HEAD
-    tag "Sample - $sampleId"
-=======
     tag "All samples"
->>>>>>> cb9a380 (Updated merge_enrichment_reports to happen once for all samples)
 
     publishDir "${workflow.projectDir}/${params.outputFolder}/reports/multiqc/", mode: 'copy'
 
