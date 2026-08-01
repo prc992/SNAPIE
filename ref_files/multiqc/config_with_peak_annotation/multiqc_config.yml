@@ -38,6 +38,7 @@ module_order:
 
 custom_content:
   order:
+    - alignment_statistics
     - frags_plot
     - peaks_plot
     - igv_housekeeping_genes
@@ -47,6 +48,25 @@ custom_content:
     - genomic_annotation
 
 custom_data:
+  alignment_statistics:
+    section_name: "Alignment Statistics"
+    description: "Read counts before and after trimming, after alignment filtering (MAPQ>30), and after duplicate removal and DAC exclusion."
+    plot_type: "table"
+    file_format: "tsv"
+    headers:
+      Total reads:
+        description: "Reads before fastp filtering."
+        format: "{:,.0f}"
+      Filtered reads:
+        description: "Reads retained after fastp filtering and supplied to alignment."
+        format: "{:,.0f}"
+      Mapped Reads:
+        description: "Alignment records retained after the MAPQ and SAM-flag filter."
+        format: "{:,.0f}"
+      Deduplicated reads:
+        description: "Alignment records retained after duplicate removal and optional DAC-region exclusion."
+        format: "{:,.0f}"
+
   dendogram_of_samples_by_snp_profile:
     section_name: "Dendrogram of Samples by SNP Profile"
     description: "Dendrogram of Samples by SNP Profile"
@@ -65,6 +85,8 @@ custom_data:
     order: 1010
 
 sp:
+  alignment_statistics:
+    fn: "alignment_statistics_mqc.tsv"
   dendogram_of_samples_by_snp_profile:
     fn: "Dendrogram_of_Samples_by_SNP_Profile.jpg"
 
