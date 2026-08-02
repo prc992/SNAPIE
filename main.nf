@@ -117,12 +117,14 @@ workflow  {
                         }
             chFilesReportAlignment = Channel.of("NO_DATA")
             chAlignmentReport = Channel.of("NO_DATA")
+            chTrimmingCounts = Channel.of("NO_DATA")
 
         } else {
             ALIGNMENT (chSampleInfo,chGenome,chGenomeIndex,\
                     chFilesReportInitialization,chInitReport,\
                     chMultiQCConfig)
             chAlign = ALIGNMENT.out.align
+            chTrimmingCounts = ALIGNMENT.out.trimming_counts
             chFilesReportAlignment = ALIGNMENT.out.files_report_alignment
             chAlignmentReport = ALIGNMENT.out.aligment_report
         }
@@ -134,6 +136,7 @@ workflow  {
     if ('BAM_PROCESSING' in run_steps) {
         BAM_PROCESSING (chSampleInfo,chGenome, chGenomeIndex,chChromSizes,chDACFileRef,chSNPS_ref,
                         chAlign,
+                        chTrimmingCounts,skip_alignment,
                         chSNPSMaSH,chSNPSMaSHPyPlot,chMultiQCConfig,
                         chFilesReportInitialization,chInitReport,
                         chFilesReportAlignment,chAlignmentReport)
@@ -182,4 +185,3 @@ workflow  {
         }
     
 }
-
