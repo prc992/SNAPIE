@@ -6,6 +6,7 @@ include {trim_fastp} from '../../modules/local/trim'
 include {align} from '../../modules/local/align'
 include {multiqc} from '../../modules/local/multiqc'
 include {moveSoftFiles} from '../../modules/local/moveSoftFiles'
+include {trimming_stats} from '../../modules/local/alignment_stats_report'
 
 workflow ALIGNMENT {
 
@@ -24,6 +25,11 @@ workflow ALIGNMENT {
     } else {
         chTrim = trim(chSampleInfo)
     }
+
+    chTrimmingReports = chTrim.map { sampleId, enrichment_mark, control, read_method, trimmedFiles, trimmingReport, trimmingHtml ->
+        tuple(sampleId, trimmingReport)
+    }
+    chTrimmingCounts = trimming_stats(chTrimmingReports)
 
     chAlign = align(chTrim,chGenome,chGenomeIndex)
 
@@ -57,6 +63,7 @@ workflow ALIGNMENT {
     }
 
     emit: align = chAlign
+    emit: trimming_counts = chTrimmingCounts
     emit: files_report_alignment = chFilesReportAlignment
     emit: aligment_report = chAlignmentReport
 
