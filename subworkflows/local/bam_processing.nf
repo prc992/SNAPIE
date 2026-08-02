@@ -13,6 +13,7 @@ include {createSMaSHFingerPrint} from '../../modules/local/snp_smash_fingerprint
 include {createSMaSHFingerPrintPlot} from '../../modules/local/snp_smash_fingerprint'
 include {multiqc} from '../../modules/local/multiqc'
 include {moveSoftFiles} from '../../modules/local/moveSoftFiles'
+include {alignment_stats_report} from '../../modules/local/alignment_stats_report'
 
 workflow BAM_PROCESSING {
 
@@ -24,6 +25,8 @@ workflow BAM_PROCESSING {
     chDACFileRef
     chSNPS_ref
     chAlign
+    chTrimmingCounts
+    chSkipAlignment
     chSNPSMaSH
     chSNPSMaSHPyPlot
     chMultiQCConfig
@@ -62,13 +65,21 @@ workflow BAM_PROCESSING {
         chDedup = dedup(chFilterQuality)
     }
 
-
     // Filter the DAC files
     if (params.exclude_dac_regions) {
         chDACFilteredFiles = dac_exclusion(chDedup,chDACFileRef)
         //chDACFilteredFiles = chDedup
     } else {
         chDACFilteredFiles = chDedup
+    }
+
+    if (!params.deduped_bam && !chSkipAlignment) {
+        chTrimmingCountFiles = chTrimmingCounts.map { sampleId, counts -> counts }.collect()
+        chMappedBamFiles = chFilterQuality.map { sampleId, enrichment_mark, control, read_method, bam, version -> bam }.collect()
+        chFinalBamFiles = chDACFilteredFiles.map { row -> row[4] }.collect()
+        chAlignmentStatsReport = alignment_stats_report(chTrimmingCountFiles, chMappedBamFiles, chFinalBamFiles)
+    } else {
+        chAlignmentStatsReport = Channel.of("NO_DATA")
     }
 
     chCreateStatsSamtoolsfiltered = createStatsSamtoolsfiltered(chDACFilteredFiles)
@@ -107,6 +118,7 @@ workflow BAM_PROCESSING {
         .combine(chCreateStatsSamtoolsfilteredAll)
         .combine(chDedupAll)
         .combine(chDACFilteredFilesAll)
+        .combine(chAlignmentStatsReport)
         .combine(chSMaSHOutoutAll)
         .combine(chSNPSMaSHPlotAll)
         .combine(chFilesReportInitializationAll)
