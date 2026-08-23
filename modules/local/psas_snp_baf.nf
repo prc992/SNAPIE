@@ -5,8 +5,6 @@ process psas_snp_baf {
 
   tag "Sample - ${sampleId}"
 
-  publishDir "${workflow.projectDir}/${params.outputFolder}/psas/${sampleId}", mode: 'copy'
-
   input:
   tuple val(sampleId), path(vcf), path(vcfIndex)
   path snpBafScript

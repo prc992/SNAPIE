@@ -5,8 +5,6 @@ process psas_genotype {
 
   tag "Sample - ${sampleId}"
 
-  publishDir "${workflow.projectDir}/${params.outputFolder}/psas/${sampleId}", mode: 'copy'
-
   input:
   tuple val(sampleId), val(enrichment_mark), val(control), val(read_method), path(sampleBam), val(_), path(genomeFile), path(genomeFai), path(genomeDict)
   path genotypeScript

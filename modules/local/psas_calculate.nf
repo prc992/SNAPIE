@@ -5,8 +5,6 @@ process psas_calculate {
 
   tag "Sample - ${sampleId}"
 
-  publishDir "${workflow.projectDir}/${params.outputFolder}/psas/${sampleId}", mode: 'copy'
-
   input:
   tuple val(sampleId), path(bafTsv), path(narrowPeak)
   path psasScript
