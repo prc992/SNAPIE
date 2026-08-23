@@ -72,6 +72,14 @@ dfJoin = dfJoin.rename(columns={
     'enrichment': 'Enrichment_Score'
 })
 
+psas_column_index = dfJoin.columns.get_loc('psas')
+psas_scores = pd.to_numeric(dfJoin['psas'], errors='coerce')
+dfJoin.insert(
+    psas_column_index + 1,
+    'PSAS_Prediction',
+    psas_scores.gt(-0.0948).map({True: 'Yes', False: 'No'})
+)
+
 dfJoin = dfJoin.where(pd.notnull(dfJoin), '')
 dfJoin = dfJoin.sort_values(
     by=['Sample', 'Enrichment_Mark'],
