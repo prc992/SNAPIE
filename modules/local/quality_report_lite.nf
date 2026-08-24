@@ -17,7 +17,8 @@ process quality_report_lite {
     path "QualityMetrics.csv" 
 
     script:
+    def psasOption = params.psas ? '--psas' : ''
     """
-    python $chReportQualityLite 
+    python $chReportQualityLite $psasOption
     """
 }

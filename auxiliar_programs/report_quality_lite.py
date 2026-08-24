@@ -1,7 +1,12 @@
 #!/usr/bin/env python
 # coding: utf-8
 import os
+import argparse
 import pandas as pd
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--psas', action='store_true')
+args = parser.parse_args()
 
 def load_csv_from_current_directory(filename):
     current_files = os.listdir(os.getcwd())
@@ -72,13 +77,19 @@ dfJoin = dfJoin.rename(columns={
     'enrichment': 'Enrichment_Score'
 })
 
-psas_column_index = dfJoin.columns.get_loc('psas')
-psas_scores = pd.to_numeric(dfJoin['psas'], errors='coerce')
-dfJoin.insert(
-    psas_column_index + 1,
-    'PSAS_Prediction',
-    psas_scores.gt(-0.0948).map({True: 'Yes', False: 'No'})
-)
+if args.psas:
+    psas_column_index = dfJoin.columns.get_loc('psas')
+    psas_scores = pd.to_numeric(dfJoin['psas'], errors='coerce')
+    dfJoin.insert(
+        psas_column_index + 1,
+        'pSAS_Prediction',
+        psas_scores.gt(-0.0948).map({True: 'Yes', False: 'No'})
+    )
+    dfJoin = dfJoin.rename(columns={
+        'psas': 'pSAS_Score'
+    })
+else:
+    dfJoin = dfJoin.drop(columns=['psas'], errors='ignore')
 
 dfJoin = dfJoin.where(pd.notnull(dfJoin), '')
 dfJoin = dfJoin.sort_values(
