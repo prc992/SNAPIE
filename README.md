@@ -263,15 +263,19 @@ Controls how the normalization step is executed:
 
 Target regions BED file
 
---reference-sites (optional)
+--chromatin_count_reference (optional)
 
-Specifies a BED file containing reference genomic regions used for reference-based normalization.
-
-
-When provided, fragment counts at target regions are normalized by the total fragment signal observed across these reference loci.
+Specifies a BED file to use as the reference for every sample in both single
+and batch mode. When this parameter is not provided, single mode selects
+reference sites automatically for each sample from
+`ref_files/enrichment_states/<enrichment_mark>/on.target.filt.bed`; batch mode
+runs without reference sites. When a reference is available, fragment counts at
+target regions are normalized by the total fragment signal observed across
+those reference loci.
 
 - This helps correct for global signal-to-noise differences between samples and is particularly useful for cfDNA and other low-input assays.
-- If not provided, normalization is performed using library-size–based scaling only.
+- If a sample has no matching enrichment-mark reference, normalization is performed using library-size–based scaling only.
+- In batch mode, library-size–based scaling is used when `--chromatin_count_reference` is not provided.
 
 ---
 

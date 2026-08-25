@@ -108,20 +108,40 @@ workflow BAM_SIGNAL_PROCESSING {
     }
 
     //CHROMATIN COUNT NORMALIZATION *******************************
-    chReferenceSitesCCN = params.chromatin_count_reference ? \
-    Channel.fromPath(params.chromatin_count_reference, checkIfExists: true) : Channel.fromPath(params.dummy_control_file)
     chTargetSitesCCN = params.chromatin_count_target_sites ? \
     Channel.fromPath(params.chromatin_count_target_sites, checkIfExists: true) : chTSSPromoterPeaks_ref
 
     chromatin_count_mode = params.chromatin_count_mode.toLowerCase()
     if (chromatin_count_mode == "single") {
-        chChromatinCountNormalization = chromatin_count_normalization_single(chBedFiles,chReferenceSitesCCN,chTargetSitesCCN)
+        chChromatinCountInput = chBedFiles.map { sampleId, enrichmentMark, control, readMethod, bedFile, version ->
+            def referenceCandidate = params.chromatin_count_reference ? \
+                file(params.chromatin_count_reference, checkIfExists: true) : \
+                file("${params.enrichment_states_ref}/${enrichmentMark}/on.target.filt.bed")
+            def hasReference = referenceCandidate.exists()
+            tuple(
+                sampleId,
+                enrichmentMark,
+                control,
+                readMethod,
+                bedFile,
+                version,
+                hasReference ? referenceCandidate : fake_control,
+                hasReference
+            )
+        }
+        chChromatinCountNormalization = chromatin_count_normalization_single(chChromatinCountInput,chTargetSitesCCN)
     } else if (chromatin_count_mode == "batch") {
 
         chBedsAllFiles = chBedFiles.collect()
         chOnlyBedsFiles = chBedsAllFiles.map { collectedFiles ->
         collectedFiles.findAll { it.toString().endsWith('.bed') }} // Filter the bed files
-        chChromatinCountNormalization = chromatin_count_normalization_batch(chOnlyBedsFiles,chReferenceSitesCCN,chTargetSitesCCN)
+        chChromatinCountInput = chOnlyBedsFiles.map { bedFiles ->
+            def hasReference = params.chromatin_count_reference as boolean
+            def referenceFile = hasReference ? \
+                file(params.chromatin_count_reference, checkIfExists: true) : fake_control
+            tuple(bedFiles, referenceFile, hasReference)
+        }
+        chChromatinCountNormalization = chromatin_count_normalization_batch(chChromatinCountInput,chTargetSitesCCN)
     }
     //***************************************************************
 

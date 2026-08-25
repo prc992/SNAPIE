@@ -6,15 +6,14 @@ process chromatin_count_normalization_batch {
   publishDir "${workflow.projectDir}/${params.outputFolder}/chromatin_count_normalization/batch", mode: 'copy'
 
   input:
-  path (bedFiles)
-  each path (referenceSitesFile)
+  tuple path(bedFiles), path(referenceSitesFile), val(useReferenceSites)
   each path (targetSitesFile)
 
   output:
   path "output", type: 'dir'
 
   script:
-  def ref_arg = params.chromatin_count_reference ? "--reference-sites ${referenceSitesFile}" : ""
+  def ref_arg = useReferenceSites ? "--reference-sites ${referenceSitesFile}" : ""
 
   """
   # Guard: if target sites file is missing/empty, create empty outputs and exit cleanly
@@ -54,15 +53,14 @@ process chromatin_count_normalization_single {
   publishDir "${workflow.projectDir}/${params.outputFolder}/chromatin_count_normalization/${sampleId}", mode: 'copy'
 
   input:
-  tuple val(sampleId), val(_), val(_), val(_), path(bedFile), val(_)
-  each path (referenceSitesFile)
+  tuple val(sampleId), val(_), val(_), val(_), path(bedFile), val(_), path(referenceSitesFile), val(useReferenceSites)
   each path (targetSitesFile)
 
   output:
   path "output", type: 'dir'
 
   script:
-  def ref_arg = params.chromatin_count_reference ? "--reference-sites ${referenceSitesFile}" : ""
+  def ref_arg = useReferenceSites ? "--reference-sites ${referenceSitesFile}" : ""
 
   """
   # Guard: if target sites file is missing/empty, create empty outputs and exit cleanly
